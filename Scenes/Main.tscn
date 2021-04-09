@@ -1,0 +1,139 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://Assets/Materials/Grid.material" type="Material" id=1]
+[ext_resource path="res://Assets/Textures/grid.png" type="Texture" id=2]
+[ext_resource path="res://default_env.tres" type="Environment" id=3]
+[ext_resource path="res://Player/Player.tscn" type="PackedScene" id=4]
+
+[sub_resource type="PlaneMesh" id=1]
+
+[sub_resource type="ConcavePolygonShape" id=2]
+data = PoolVector3Array( 1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0, -1, 1, 0, -1 )
+
+[sub_resource type="CubeMesh" id=3]
+
+[sub_resource type="SpatialMaterial" id=5]
+albedo_texture = ExtResource( 2 )
+uv1_triplanar = true
+
+[sub_resource type="ConcavePolygonShape" id=4]
+data = PoolVector3Array( -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, 1, -1, -1, -1, -1, -1 )
+
+[node name="Main" type="Spatial"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource( 3 )
+
+[node name="Floor" type="MeshInstance" parent="."]
+transform = Transform( 256, 0, 0, 0, 1, 0, 0, 0, 256, 0, 0, 0 )
+use_in_baked_light = true
+mesh = SubResource( 1 )
+material/0 = ExtResource( 1 )
+
+[node name="StaticBody" type="StaticBody" parent="Floor"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Floor/StaticBody"]
+shape = SubResource( 2 )
+
+[node name="Box" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -5.01411, 1, 0 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Box"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Box/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Stairs" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.878331, 5.75618 )
+
+[node name="Box2" type="MeshInstance" parent="Stairs"]
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Stairs/Box2"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Stairs/Box2/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box3" type="MeshInstance" parent="Stairs"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.333588, 0.119593, 0 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Stairs/Box3"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Stairs/Box3/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box4" type="MeshInstance" parent="Stairs"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.636303, 0.217065, 0 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Stairs/Box4"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Stairs/Box4/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box5" type="MeshInstance" parent="Stairs"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96823, 0.347656, 0 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Stairs/Box5"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Stairs/Box5/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box6" type="MeshInstance" parent="Stairs"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.32804, 0.456878, 0 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Stairs/Box6"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Stairs/Box6/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box8" type="MeshInstance" parent="."]
+transform = Transform( 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0, 0, 1, 9.12065, -0.421453, 5.75618 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Box8"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Box8/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box10" type="MeshInstance" parent="."]
+transform = Transform( 2.26951, 0.950871, 0, -1.23782, 1.65558, 0, 0, 0, 1, 6.78636, -0.380044, 10.987 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Box10"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Box10/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Box7" type="MeshInstance" parent="."]
+transform = Transform( 2.05759, 0, 0, 0, 1, 0, 0, 0, 1, -5.06375, -0.599084, 5.75618 )
+use_in_baked_light = true
+mesh = SubResource( 3 )
+material/0 = SubResource( 5 )
+
+[node name="StaticBody" type="StaticBody" parent="Box7"]
+
+[node name="CollisionShape" type="CollisionShape" parent="Box7/StaticBody"]
+shape = SubResource( 4 )
+
+[node name="Player" parent="." instance=ExtResource( 4 )]
