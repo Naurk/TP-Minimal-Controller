@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Assets/MotionTrail/MotionTrail.tscn" type="PackedScene" id=1]
+
+[sub_resource type="CylinderMesh" id=1]
+
+[node name="Stick" type="MeshInstance"]
+transform = Transform( 0.013, 0, 0, 0, 0.6, 0, 0, 0, 0.013, 0, 0, 0 )
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="MotionTrail" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96391, 0 )
+trailEnabled = false
+fromWidth = 1.5
+lifespan = 0.8

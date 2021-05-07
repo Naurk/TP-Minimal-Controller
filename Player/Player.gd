@@ -32,6 +32,9 @@ onready var camera_rot = camera_base.get_node(@"CameraRot")
 onready var camera_spring_arm = camera_rot.get_node(@"SpringArm")
 onready var camera_camera = camera_spring_arm.get_node(@"Camera")
 
+## Actions variables
+var IsAttacking
+var IsRolling
 
 func _init():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -74,6 +77,21 @@ func null_state_ON():
 func null_state_OFF():
 	null_state = false
 	
+func CanHit_ON():
+	get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0).get_child(0).trailEnabled = true
+func CanHit_OFF():
+	get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0).get_child(0).trailEnabled = false
+## General reparent function: to use in code ##
+func reparent(child: Node, new_parent: Node):
+	var old_parent = child.get_parent()
+	old_parent.remove_child(child)
+	new_parent.add_child(child)
+	
+## Specific reparent function: to use in a key frame ##
+func sheat_stick():
+	reparent(get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0), get_node("PlayerModel2/Armature/Skeleton/spine_sheat/position_back_sheat"))
+	
+	
 func weapon():
 	if current_weapon == 1:
 		animation_tree.set("parameters/longsword_stance/blend_amount", 1)
@@ -82,6 +100,8 @@ func weapon():
 		
 			
 func _physics_process(delta):
+	IsAttacking = animation_tree.get("parameters/ls_slash1/active")
+	IsRolling = animation_tree.get("parameters/roll/active")
 	# Check current weapon
 	weapon()
 	###__________CAMERA SYSTEM____________###
@@ -123,10 +143,22 @@ func _physics_process(delta):
 	if on_air:
 		animation_tree["parameters/state/current"] = 2
 		
-	if null_state:
-		print("null state")
+#	if null_state:
+#		animation_tree["parameters/state/current"] = 3
+#		root_motion = animation_tree.get_root_motion_transform()
+#		orientation *= root_motion
+		#print("null state")
 		
-	elif animation_tree.get("parameters/roll/active") == true:
+	elif IsAttacking:
+		animation_tree.set("parameters/ls_dash/blend_amount", lerp(animation_tree.get("parameters/ls_dash/blend_amount"), 0, delta * 3))
+		animation_tree.set("parameters/blocking/blend_amount", 0)
+		animation_tree.set("parameters/walk/blend_position", 0)
+		animation_tree.set("parameters/strafe/blend_position", Vector2(0, 0))
+		animation_tree.set("parameters/dash/blend_amount", 0)
+		root_motion = animation_tree.get_root_motion_transform()
+		orientation *= root_motion
+		
+	elif IsRolling:
 		animation_tree.set("parameters/ls_dash/blend_amount", lerp(animation_tree.get("parameters/ls_dash/blend_amount"), 0, delta * 3))
 		animation_tree.set("parameters/blocking/blend_amount", 0)
 		animation_tree.set("parameters/walk/blend_position", 0)
@@ -158,6 +190,7 @@ func _physics_process(delta):
 	elif Input.is_action_just_released("change_weapon") and is_on_floor() and animation_tree.get("parameters/roll/active") == false and animation_tree.get("parameters/blocking/blend_amount") != 1:
 		if current_weapon == 0:
 			animation_tree.set("parameters/draw_longsword/active", true)
+			reparent(get_node("PlayerModel2/Armature/Skeleton/spine_sheat/position_back_sheat").get_child(0), get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand"))
 			current_weapon = 1
 		else:
 			animation_tree.set("parameters/sheat_longsword/active", true)
