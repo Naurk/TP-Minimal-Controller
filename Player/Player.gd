@@ -18,7 +18,6 @@ var motion = Vector2()
 var velocity = Vector3()
 var camera_x_rot = 0.0
 var roll_quat = Quat()
-#var n_combo = 3
 onready var null_state = false
 
 onready var current_weapon = 0
@@ -48,29 +47,23 @@ func _input(event):
 	if event is InputEventMouseMotion:
 		var camera_speed_this_frame = CAMERA_MOUSE_ROTATION_SPEED
 		rotate_camera(event.relative * camera_speed_this_frame)
-	elif !animation_tree.get("parameters/roll/active"):
+	if !animation_tree.get("parameters/roll/active"):
 		#!!!ROLL SYSTEM!!! 
 		if event.is_action_pressed("sprint"): 
 			if $roll_window.is_stopped():
 				$roll_window.start()
 		if event.is_action_released("sprint"):
-			animation_tree.set("parameters/walk/blend_position", 0)
-			#animation_tree.set("parameters/dash/blend_amount", lerp(animation_tree.get("parameters/dash/blend_amount"), 0, 0.04))
-			if !$roll_window.is_stopped() and is_on_floor():
+			if !$roll_window.is_stopped() and !animation_tree.get("parameters/sheath_r/active") and !animation_tree.get("parameters/draw_r/active"): #and is_on_floor()
 				$roll_window.stop()
 				animation_tree.set("parameters/roll/active", true)
-				
 				var camera_basis = camera_rot.global_transform.basis
 				var camera_z = camera_basis.z
 				var camera_x = camera_basis.x
 				var target = camera_x * motion.x + Vector3(camera_z[0],0,camera_z[2]) * motion.y
-				
-				#var q_from = orientation.basis.get_rotation_quat()
 				var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
 				roll_quat = q_to
-				#animation_tree.set("parameters/dash/blend_amount", 0)
-				$roll_timer.start()
 				return roll_quat 
+				
 func null_state_ON():
 	null_state = true
 	
@@ -81,33 +74,38 @@ func CanHit_ON():
 	get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0).get_child(0).trailEnabled = true
 func CanHit_OFF():
 	get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0).get_child(0).trailEnabled = false
-## General reparent function: to use in code ##
+	
+	
+
 func reparent(child: Node, new_parent: Node):
 	var old_parent = child.get_parent()
 	old_parent.remove_child(child)
 	new_parent.add_child(child)
 	
-## Specific reparent function: to use in a key frame ##
 func sheat_stick():
 	reparent(get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0), get_node("PlayerModel2/Armature/Skeleton/spine_sheat/position_back_sheat"))
 	
 	
-func weapon():
+func check_weapon_stance(delta):
 	if current_weapon == 1:
-		animation_tree.set("parameters/longsword_stance/blend_amount", 1)
+		$PlayerModel2/Armature/Skeleton/lefthand_IK.start(false)
+		animation_tree.set("parameters/stance/blend_amount", 1)
+		if $PlayerModel2/Armature/Skeleton/lefthand_IK.get_interpolation() != 1:
+			$PlayerModel2/Armature/Skeleton/lefthand_IK.set_interpolation(lerp($PlayerModel2/Armature/Skeleton/lefthand_IK.get_interpolation(), 1, delta))
 	if current_weapon == 0:
-		animation_tree.set("parameters/longsword_stance/blend_amount", 0)
-		
+		animation_tree.set("parameters/stance/blend_amount", 0)
+		if $PlayerModel2/Armature/Skeleton/lefthand_IK.get_interpolation() != 0:
+			$PlayerModel2/Armature/Skeleton/lefthand_IK.set_interpolation(lerp($PlayerModel2/Armature/Skeleton/lefthand_IK.get_interpolation(), 0, delta * 6))
+		else:
+			$PlayerModel2/Armature/Skeleton/lefthand_IK.stop()
 			
 func _physics_process(delta):
 	IsAttacking = animation_tree.get("parameters/ls_slash1/active")
 	IsRolling = animation_tree.get("parameters/roll/active")
-	# Check current weapon
-	weapon()
 	###__________CAMERA SYSTEM____________###
 	var camera_move = Vector2(
 			Input.get_action_strength("view_right") - Input.get_action_strength("view_left"),
-			Input.get_action_strength("view_up") - Input.get_action_strength("view_down"))
+			Input.get_action_strength("view_down") - Input.get_action_strength("view_up"))
 	var camera_speed_this_frame = delta * CAMERA_CONTROLLER_ROTATION_SPEED
 	rotate_camera(camera_move * camera_speed_this_frame)
 	var motion_target = Vector2(
@@ -129,11 +127,8 @@ func _physics_process(delta):
 	if is_on_floor():
 		if airborne_time > 0.5:
 			animation_tree.set("parameters/landing/active", true)
-		airborne_time = 0
-		
-	
+		airborne_time = 0	
 	var on_air = airborne_time > MIN_AIRBORNE_TIME
-	
 	#JUMP? TODO
 	if not on_air and animation_tree.get("parameters/dash/blend_amount") >= 1 and Input.is_action_just_pressed("jump"):
 		velocity.y = 5
@@ -143,11 +138,6 @@ func _physics_process(delta):
 	if on_air:
 		animation_tree["parameters/state/current"] = 2
 		
-#	if null_state:
-#		animation_tree["parameters/state/current"] = 3
-#		root_motion = animation_tree.get_root_motion_transform()
-#		orientation *= root_motion
-		#print("null state")
 		
 	elif IsAttacking:
 		animation_tree.set("parameters/ls_dash/blend_amount", lerp(animation_tree.get("parameters/ls_dash/blend_amount"), 0, delta * 3))
@@ -164,42 +154,31 @@ func _physics_process(delta):
 		animation_tree.set("parameters/walk/blend_position", 0)
 		animation_tree.set("parameters/strafe/blend_position", Vector2(0, 0))
 		animation_tree.set("parameters/dash/blend_amount", 0)
-		animation_tree.set("parameters/longsword_stance/blend_amount", 0)
-		#var target = camera_basis + (motion.x * motion.y)
-		#var q_from = orientation.basis.get_rotation_quat()
-		#var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
-		#orientation.basis = Basis(q_from.slerp(roll_quat, delta * ROTATION_INTERPOLATE_SPEED))
+		animation_tree.set("parameters/stance/blend_amount", 0)
 		orientation.basis = Basis(roll_quat)
 		root_motion = animation_tree.get_root_motion_transform()
 		orientation *= root_motion
 		
 		
-	#ATTACK#
+	#ATTACK INPUT#
 	elif Input.is_action_just_pressed("light_attack"):
-		if !animation_tree.get("parameters/ls_slash2/active") && current_weapon == 1: #  && n_combo == 3:
+		if !animation_tree.get("parameters/ls_slash2/active") && current_weapon == 1: 
 			animation_tree.set("parameters/ls_slash1/active", true)
-			#n_combo =  n_combo - 1
-			#print("combo 1")
-		#elif  !animation_tree.get("parameters/ls_slash2/active") && current_weapon == 1  && n_combo == 2:
-		#	animation_tree.set("parameters/ls_slash1/active", false)
-		#	animation_tree.set("parameters/ls_slash2/active", true)
-		#	print("combo 2")
-		#	n_combo =  3
-			
-	#CHANGE WEAPON#	
-	elif Input.is_action_just_released("change_weapon") and is_on_floor() and animation_tree.get("parameters/roll/active") == false and animation_tree.get("parameters/blocking/blend_amount") != 1:
-		if current_weapon == 0:
-			animation_tree.set("parameters/draw_longsword/active", true)
-			reparent(get_node("PlayerModel2/Armature/Skeleton/spine_sheat/position_back_sheat").get_child(0), get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand"))
-			current_weapon = 1
-		else:
-			animation_tree.set("parameters/sheat_longsword/active", true)
-			#animation_tree.set("parameters/draw_longsword/active", true)
-			current_weapon = 0
-			animation_tree.set("parameters/ls_dash/blend_amount", lerp(animation_tree.get("parameters/ls_dash/blend_amount"), 0, delta * 3))
-			
+
+	#CHANGE WEAPON#
+	elif Input.is_action_just_released("change_weapon")  and !animation_tree.get("parameters/roll/active") and animation_tree.get("parameters/blocking/blend_amount") != 1:
+		if !animation_tree.get("parameters/sheath_r/active") and !animation_tree.get("parameters/draw_r/active"):
+			if current_weapon == 0:
+				animation_tree.set("parameters/draw_r/active", true)
+				reparent(get_node("PlayerModel2/Armature/Skeleton/spine_sheat/position_back_sheat").get_child(0), get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand"))
+				current_weapon = 1
+			else:
+				animation_tree.set("parameters/sheath_r/active", true)
+				current_weapon = 0
+				animation_tree.set("parameters/ls_dash/blend_amount", lerp(animation_tree.get("parameters/ls_dash/blend_amount"), 0, delta * 3))
+	
 		
-	#AIMING#
+	#AIMING STATE#
 	elif Input.is_action_pressed("aim"):
 		animation_tree["parameters/state/current"] = 1
 		animation_tree.set("parameters/rotate/add_amount", 0)
@@ -227,7 +206,7 @@ func _physics_process(delta):
 		
 		
 	else:
-	# WALKING #
+	# WALKING STATE#
 	# Convert orientation to quaternions for interpolating rotation.
 		var target = camera_x * motion.x + camera_z * motion.y
 		if target.length() > 0.2:
@@ -241,6 +220,7 @@ func _physics_process(delta):
 	# Apply root motion to orientation.
 		orientation *= root_motion
 		
+		#SPRINT and STANCE (animation) INTERPOLATION#
 		if animation_tree.get("parameters/walk/blend_position") > 0.5 and Input.is_action_pressed("sprint"):
 			animation_tree.set("parameters/dash/blend_amount", lerp(animation_tree.get("parameters/dash/blend_amount"), 1.5, delta * 2))
 		else:
@@ -266,6 +246,9 @@ func _physics_process(delta):
 	orientation = orientation.orthonormalized() # Orthonormalize orientation.
 	
 	player_model.global_transform.basis = orientation.basis
+	
+	# Check current weapon
+	check_weapon_stance(delta)
 	
 
 func rotate_camera(move):

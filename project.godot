@@ -10,7 +10,6 @@ config_version=4
 
 _global_script_classes=[  ]
 _global_script_class_icons={
-
 }
 
 [application]
@@ -107,7 +106,6 @@ light_attack={
 
 [rendering]
 
-quality/filters/anisotropic_filter_level=1
 quality/shadow_atlas/quadrant_0_subdiv=0
 quality/shadow_atlas/quadrant_1_subdiv=0
 quality/shadow_atlas/quadrant_2_subdiv=0
@@ -116,6 +114,7 @@ quality/shadows/filter_mode=0
 quality/reflections/texture_array_reflections=false
 quality/reflections/high_quality_ggx=false
 quality/depth_prepass/enable=false
+quality/filters/anisotropic_filter_level=1
 quality/subsurface_scattering/quality=0
 quality/subsurface_scattering/weight_samples=false
 quality/depth/hdr=false
