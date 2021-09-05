@@ -64,17 +64,16 @@ func _input(event):
 				roll_quat = q_to
 				return roll_quat 
 				
-func null_state_ON():
-	null_state = true
+#func null_state_ON():
+#	null_state = true
 	
-func null_state_OFF():
-	null_state = false
+#func null_state_OFF():
+#	null_state = false
 	
 func CanHit_ON():
 	get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0).get_child(0).trailEnabled = true
 func CanHit_OFF():
 	get_node("PlayerModel2/Armature/Skeleton/right_hand/position_in_hand").get_child(0).get_child(0).trailEnabled = false
-	
 	
 
 func reparent(child: Node, new_parent: Node):
@@ -100,7 +99,7 @@ func check_weapon_stance(delta):
 			$PlayerModel2/Armature/Skeleton/lefthand_IK.stop()
 			
 func _physics_process(delta):
-	IsAttacking = animation_tree.get("parameters/ls_slash1/active")
+	#IsAttacking = animation_tree.get("parameters/combo_hit1/active")
 	IsRolling = animation_tree.get("parameters/roll/active")
 	###__________CAMERA SYSTEM____________###
 	var camera_move = Vector2(
@@ -138,7 +137,23 @@ func _physics_process(delta):
 	if on_air:
 		animation_tree["parameters/state/current"] = 2
 		
-		
+	#ATTACK INPUT#
+	elif Input.is_action_just_pressed("light_attack") and current_weapon == 1 and !IsRolling and !animation_tree.get("draw_r"):
+		#LightAttack = true
+		#HeavyAttack = false
+		if $ComboSystem.combomod == 0 and $ComboSystem.combo == 0  and !animation_tree.get("parameters/combo_hit1/active"):#!IsAttacking:
+			$ComboSystem.combo = 1
+			print("BEGIN ATTACK")
+			$ComboSystem.combo_blend()
+			return $ComboSystem.combo
+		elif $ComboSystem.combomod == 1: 
+			$ComboSystem.combo = 2
+			print("BUTTON PRESSED in combowindow:::::", $ComboSystem.combo)
+			return $ComboSystem.combo
+		else:
+			$ComboSystem.combo = 0
+			return $ComboSystem.combo
+				
 	elif IsAttacking:
 		animation_tree.set("parameters/ls_dash/blend_amount", lerp(animation_tree.get("parameters/ls_dash/blend_amount"), 0, delta * 3))
 		animation_tree.set("parameters/blocking/blend_amount", 0)
@@ -159,12 +174,6 @@ func _physics_process(delta):
 		root_motion = animation_tree.get_root_motion_transform()
 		orientation *= root_motion
 		
-		
-	#ATTACK INPUT#
-	elif Input.is_action_just_pressed("light_attack"):
-		if !animation_tree.get("parameters/ls_slash2/active") && current_weapon == 1: 
-			animation_tree.set("parameters/ls_slash1/active", true)
-
 	#CHANGE WEAPON#
 	elif Input.is_action_just_released("change_weapon")  and !animation_tree.get("parameters/roll/active") and animation_tree.get("parameters/blocking/blend_amount") != 1:
 		if !animation_tree.get("parameters/sheath_r/active") and !animation_tree.get("parameters/draw_r/active"):
