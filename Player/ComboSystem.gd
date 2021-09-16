@@ -47,7 +47,7 @@ func combo_blend():
 		var step_anim = anim_tree_root.get_node("step_attack")
 		next_anim = "great sword slash 3"
 		anim_node1.set_animation(next_anim)
-		step_anim.set_animation("step_L")
+		step_anim.set_animation("step_L3")
 		return
 	else:
 		pass
