@@ -12,4 +12,4 @@ https://youtu.be/bp0s5EC3dTA
 
 # Basic Combo System - Overview
 https://youtu.be/wTeF-hl2IJY
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://youtu.be/wTeF-hl2IJY "Video Title")
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/wTeF-hl2IJY/0.jpg)](https://youtu.be/wTeF-hl2IJY "Video Title")
