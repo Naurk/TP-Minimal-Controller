@@ -1,12 +1,10 @@
-# TP-Minimal-Controller
+# TP Souls-like Minimal-Controller
 This is just a simple third person player controller for Godot 3. Is inspired by the 'souls like' genre.
 
 # Introduction
-https://youtu.be/h4sGdui4Cfo
-[![Introduction](http://img.youtube.com/vi/h4sGdui4Cfo /0.jpg)](https://youtu.be/h4sGdui4Cfo "Introduction")
+[![Introduction](http://img.youtube.com/vi/h4sGdui4Cfo/0.jpg)](https://youtu.be/h4sGdui4Cfo "Introduction")
 
 # Weapon Equip & Trail
-https://youtu.be/cj9S_5N0Z88
 [![Weapon Equip & Trail](http://img.youtube.com/vi/cj9S_5N0Z88/0.jpg)](https://youtu.be/cj9S_5N0Z88 "Weapon Equip & Trail")
 
 # Inverse Kinematics for two-handed grip
